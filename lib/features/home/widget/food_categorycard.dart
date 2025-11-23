@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hungry/core/constants/app_colors.dart';
 import 'package:hungry/shared/custom_text.dart';
 
-class FoodCategory extends StatefulWidget {
-  const FoodCategory({
+class FoodCategoryCard extends StatefulWidget {
+  const FoodCategoryCard({
     super.key,
     required this.selectedIndex,
     required this.category,
@@ -12,11 +12,12 @@ class FoodCategory extends StatefulWidget {
   final List category;
 
   @override
-  State<FoodCategory> createState() => _FoodCategoryState();
+  State<FoodCategoryCard> createState() => _FoodCategoryState();
 }
 
-class _FoodCategoryState extends State<FoodCategory> {
+class _FoodCategoryState extends State<FoodCategoryCard> {
   late int selectedIndex;
+
   @override
   void initState() {
     selectedIndex = widget.selectedIndex;
@@ -28,29 +29,21 @@ class _FoodCategoryState extends State<FoodCategory> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(widget.category.length, (index) {
+          final isSelected = selectedIndex == index;
           return GestureDetector(
-            onTap: () {
-              setState(() {
-                selectedIndex = index;
-              });
-            },
+            onTap: () => setState(() => selectedIndex = index),
             child: Container(
-              margin: EdgeInsets.only(right: 8),
-              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+              margin: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
               decoration: BoxDecoration(
-                color: selectedIndex == index
-                    ? AppColors.primaryColor
-                    : Colors.white,
+                color: isSelected ? AppColors.primaryColor : Colors.white,
                 borderRadius: BorderRadius.circular(15),
               ),
               child: CustomText(
                 text: widget.category[index],
                 fontWeight: FontWeight.w700,
-                color: selectedIndex == index
-                    ? Colors.white
-                    : Colors.grey.shade600,
+                color: isSelected ? Colors.white : Colors.grey.shade600,
               ),
             ),
           );

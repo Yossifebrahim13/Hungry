@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
 
-class ToppingsCard extends StatefulWidget {
+class OptionsCard extends StatefulWidget {
   final String imagePath;
   final String topping;
+  final int toppingId; // ✅ نضيف ID رقمي
+  final List<int> selectedOptions;
 
-  const ToppingsCard({
+  const OptionsCard({
     super.key,
     required this.imagePath,
     required this.topping,
+    required this.toppingId, // ✅ لازم تمرره عند الاستخدام
+    required this.selectedOptions,
   });
 
   @override
-  State<ToppingsCard> createState() => _ToppingsCardState();
+  State<OptionsCard> createState() => _OptionsCardState();
 }
 
-class _ToppingsCardState extends State<ToppingsCard> {
+class _OptionsCardState extends State<OptionsCard> {
   bool isAdded = false;
 
   @override
@@ -36,17 +40,15 @@ class _ToppingsCardState extends State<ToppingsCard> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-         
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            child: Image.asset(
+            child: Image.network(
               widget.imagePath,
               height: 90,
               fit: BoxFit.contain,
             ),
           ),
 
-         
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
             decoration: const BoxDecoration(
@@ -56,19 +58,26 @@ class _ToppingsCardState extends State<ToppingsCard> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  widget.topping,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
+                Flexible(
+                  child: Text(
+                    widget.topping,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-
-               
                 GestureDetector(
                   onTap: () {
                     setState(() {
                       isAdded = !isAdded;
+
+                      if (isAdded) {
+                        widget.selectedOptions.add(widget.toppingId);
+                      } else {
+                        widget.selectedOptions.remove(widget.toppingId);
+                      }
                     });
                   },
                   child: AnimatedContainer(

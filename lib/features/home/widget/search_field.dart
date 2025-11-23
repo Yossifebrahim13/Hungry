@@ -2,18 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:hungry/core/constants/app_colors.dart';
 
 class SearchField extends StatefulWidget {
-  const SearchField({super.key});
+  const SearchField({super.key, this.controller, this.onChanged});
+  final TextEditingController? controller;
+  final Function(String)? onChanged;
 
   @override
   State<SearchField> createState() => _SearchFieldState();
 }
 
 class _SearchFieldState extends State<SearchField> {
-  final TextEditingController _controller = TextEditingController();
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? TextEditingController();
+  }
 
   @override
   void dispose() {
-    _controller.dispose();
+    // Only dispose if this state created the controller
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
@@ -21,7 +32,6 @@ class _SearchFieldState extends State<SearchField> {
   Widget build(BuildContext context) {
     return Material(
       elevation: 5,
-      // ignore: deprecated_member_use
       shadowColor: Colors.black.withOpacity(0.2),
       borderRadius: BorderRadius.circular(15),
       child: SizedBox(
@@ -53,7 +63,7 @@ class _SearchFieldState extends State<SearchField> {
               borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
             ),
           ),
-          onChanged: (value) => setState(() {}),
+          onChanged: widget.onChanged,
         ),
       ),
     );

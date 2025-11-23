@@ -10,9 +10,9 @@ import 'package:hungry/core/constants/image_path.dart';
 import 'package:hungry/features/auth/data/auth_repo.dart';
 import 'package:hungry/features/auth/data/user_model.dart';
 import 'package:hungry/features/auth/view/login_view.dart';
-import 'package:hungry/features/auth/view/signup_view.dart';
 import 'package:hungry/features/auth/widget/custom_profile_btn.dart';
 import 'package:hungry/features/auth/widget/custom_user_textfield.dart';
+import 'package:hungry/features/auth/widget/profile_guest_view.dart';
 import 'package:hungry/root.dart';
 import 'package:hungry/shared/custom_button.dart';
 import 'package:hungry/shared/custom_snack_bar.dart';
@@ -323,20 +323,7 @@ class _ProfileViewState extends State<ProfileView> {
         ),
       );
     } else {
-      return Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(
-          child: CustomButton(
-            width: 200,
-            height: 100,
-            fontSize: 18,
-            btnBackground: AppColors.primaryColor,
-            titleColor: Colors.white,
-            title: 'Create an account',
-            onTap: () => Get.offAll(SignupView()),
-          ),
-        ),
-      );
+      return Scaffold(backgroundColor: Colors.white, body: profileGuestView());
     }
   }
 }

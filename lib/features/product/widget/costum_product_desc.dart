@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
-class CustomText extends StatelessWidget {
+class CustomProductDesc extends StatelessWidget {
   final String text;
   final Color? color;
   final double? fontSize;
   final FontWeight? fontWeight;
-  const CustomText({
+
+  const CustomProductDesc({
     super.key,
     required this.text,
     this.color,
@@ -22,7 +23,6 @@ class CustomText extends StatelessWidget {
         fontSize: fontSize,
         fontWeight: fontWeight,
       ),
-      overflow: TextOverflow.fade,
     );
   }
 }

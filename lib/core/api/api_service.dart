@@ -7,9 +7,12 @@ class ApiService {
   final DioClient _dioClient = DioClient();
 
   /// -------------------- GET --------------------
-  Future<dynamic> get(String endPoint) async {
+  Future<dynamic> get(String endPoint, {dynamic params}) async {
     try {
-      final response = await _dioClient.dio.get(endPoint);
+      final response = await _dioClient.dio.get(
+        endPoint,
+        queryParameters: params,
+      );
       return response.data;
     } on DioException catch (e) {
       return ApiExceptions.handleErrors(e);
@@ -51,9 +54,17 @@ class ApiService {
   }
 
   /// -------------------- DELETE --------------------
-  Future<dynamic> delete(String endPoint, Map<String, dynamic> data) async {
+  Future<dynamic> delete(
+    String endPoint,
+    Map<String, dynamic> data, {
+    dynamic params,
+  }) async {
     try {
-      final response = await _dioClient.dio.delete(endPoint, data: data);
+      final response = await _dioClient.dio.delete(
+        endPoint,
+        data: data,
+        queryParameters: params,
+      );
       return response.data;
     } on DioException catch (e) {
       return ApiExceptions.handleErrors(e);
@@ -87,5 +98,10 @@ class ApiService {
     } on DioException catch (e) {
       return ApiExceptions.handleErrors(e);
     }
+  }
+
+  void clearAuthHeader() {
+    _dioClient.options.headers.remove('Authorization');
+    print('🧹 Auth header cleared from Dio');
   }
 }

@@ -31,11 +31,11 @@ class _SplashViewState extends State<SplashView>
   Future<void> checkLogin() async {
     final user = await authRepo.autoLogin();
     if (authRepo.isGuest) {
-      Get.offAll(Root());
+      Get.offAll(() => Root());
     } else if (user != null) {
-      Get.offAll(Root());
+      Get.offAll(() => Root());
     } else {
-      Get.offAll(LoginView());
+      Get.offAll(() => LoginView());
     }
   }
 

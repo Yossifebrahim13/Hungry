@@ -16,6 +16,12 @@ class ApiExceptions {
     if (statusCode == 302) {
       return ApiErrors(message: 'Email already exists');
     }
+    if (statusCode == 404) {
+      return ApiErrors(message: 'Email is not Correct');
+    }
+    if (statusCode == 401) {
+      return ApiErrors(message: 'Password is not Correct');
+    }
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
         return ApiErrors(message: 'Bad Connection');

@@ -6,20 +6,20 @@ import 'package:hungry/core/utils/pref_helpers.dart';
 import 'package:hungry/features/auth/data/user_model.dart';
 
 class AuthRepo {
-  ApiService apiService = ApiService();
+  final ApiService apiService = ApiService();
   bool isGuest = false;
   UserModel? _currentUser;
 
-  // LOGIN
+  /// ========================= LOGIN ========================= ///
   Future<UserModel?> login(String email, String password) async {
     try {
       final response = await apiService.post('/login', {
         "email": email,
         "password": password,
       });
-      if (response is ApiErrors) {
-        throw response;
-      }
+
+      if (response is ApiErrors) throw response;
+
       if (response is Map<String, dynamic>) {
         final msg = response['message'];
         final code = response['code'];
@@ -29,12 +29,21 @@ class AuthRepo {
           throw ApiErrors(message: msg ?? "Login failed");
         }
 
-        final user = UserModel.fromJson(response['data']);
+        final user = UserModel.fromJson(data);
+
         if (user.token != null) {
+          /// clear old tokens/data before saving new one
+          await PrefHelpers.clearToken();
           await PrefHelpers.saveToken(user.token!);
+          print("🔐 New token saved after login: ${user.token}");
         }
+
         isGuest = false;
         _currentUser = user;
+
+        /// small delay to make sure token is saved before moving
+        await Future.delayed(const Duration(milliseconds: 300));
+
         return user;
       } else {
         throw ApiErrors(message: "Invalid response from server");
@@ -46,7 +55,7 @@ class AuthRepo {
     }
   }
 
-  /// SIGNUP
+  /// ========================= SIGNUP ========================= ///
   Future<UserModel?> signup(String name, String email, String password) async {
     try {
       final response = await apiService.post('/register', {
@@ -54,9 +63,9 @@ class AuthRepo {
         "email": email,
         "password": password,
       });
-      if (response is ApiErrors) {
-        throw response;
-      }
+
+      if (response is ApiErrors) throw response;
+
       if (response is Map<String, dynamic>) {
         final msg = response['message'];
         final code = response['code'];
@@ -67,11 +76,19 @@ class AuthRepo {
         }
 
         final user = UserModel.fromJson(response['data']);
+
         if (user.token != null) {
+          await PrefHelpers.clearToken();
           await PrefHelpers.saveToken(user.token!);
+          print("🆕 Token saved after signup: ${user.token}");
         }
+
         isGuest = false;
         _currentUser = user;
+
+        /// delay to ensure token sync
+        await Future.delayed(const Duration(milliseconds: 300));
+
         return user;
       } else {
         throw ApiErrors(message: "Invalid response from server");
@@ -83,34 +100,39 @@ class AuthRepo {
     }
   }
 
-  /// Get Profile Data
-
+  /// ========================= PROFILE ========================= ///
   Future<UserModel?> getProfileData() async {
     try {
       final token = await PrefHelpers.getToken();
+      print("📦 Fetching profile with token: $token");
+
       if (token == null || token == 'guest') {
+        isGuest = true;
         return null;
       }
 
       final response = await apiService.get('/profile');
-      final user = UserModel.fromJson(response['data']);
-      _currentUser = user;
-      final code = response['code'];
-      final msg = response['message'];
-      if (code != 200 || response['data'] == null) {
-        throw ApiErrors(message: msg ?? "Failed to load profile");
-      }
 
-      return user;
+      if (response is Map<String, dynamic>) {
+        final code = response['code'];
+        final msg = response['message'];
+        if (code != 200 || response['data'] == null) {
+          throw ApiErrors(message: msg ?? "Failed to load profile");
+        }
+
+        final user = UserModel.fromJson(response['data']);
+        _currentUser = user;
+        return _currentUser;
+      } 
     } on DioException catch (e) {
       throw ApiExceptions.handleErrors(e);
     } catch (e) {
       throw ApiErrors(message: e.toString());
     }
+    return null;
   }
 
-  /// Update Profile Data
-
+  /// ========================= UPDATE PROFILE ========================= ///
   Future<UserModel?> updateProfileDate({
     required String name,
     required String email,
@@ -133,22 +155,18 @@ class AuthRepo {
 
       final response = await apiService.post('/update-profile', formData);
 
-      if (response is ApiErrors) {
-        throw response;
-      }
+      if (response is ApiErrors) throw response;
       if (response is! Map<String, dynamic>) {
         throw ApiErrors(message: "Invalid response from server");
       }
 
       final msg = response['message'];
-      final code = response['code'];
-      final data = response['data'];
-
-      final coder = int.tryParse(code?.toString() ?? '');
-      if (coder != 200 && coder != 201) {
+      final code = int.tryParse(response['code']?.toString() ?? '');
+      if (code != 200 && code != 201) {
         throw ApiErrors(message: msg ?? "Unknown Error");
       }
-      final updatedUser = UserModel.fromJson(data);
+
+      final updatedUser = UserModel.fromJson(response['data']);
       _currentUser = updatedUser;
       return updatedUser;
     } on DioException catch (e) {
@@ -158,55 +176,75 @@ class AuthRepo {
     }
   }
 
-  /// Logout
-
+  /// ========================= LOGOUT ========================= ///
   Future<void> logout() async {
     try {
-      final response = await apiService.post('/logout', {});
-
-      if (response == null || response is ApiErrors) {
-        throw ApiErrors(message: "Logout failed");
-      }
-
-      await PrefHelpers.clearToken();
-      _currentUser = null;
-      isGuest = true;
-    } catch (e) {
-      throw ApiErrors(message: e.toString());
+      await apiService.post('/logout', {});
+    } catch (_) {
     }
+
+    await PrefHelpers.clearToken();
+    await PrefHelpers.saveToken('guest');
+    _currentUser = null;
+    isGuest = true;
+
+    apiService.clearAuthHeader();
+
+    print("🚪 User logged out — switched to guest mode");
   }
 
-  /// Continue as a guest
-
+  /// ========================= GUEST MODE ========================= ///
   Future<void> continueAsGuest() async {
     isGuest = true;
     _currentUser = null;
+    await PrefHelpers.clearToken();
     await PrefHelpers.saveToken('guest');
+    print("👤 Continue as guest mode");
   }
 
-  /// Auto Login
-
+  /// ========================= AUTO LOGIN ========================= ///
   Future<UserModel?> autoLogin() async {
-    final token = await PrefHelpers.getToken();
-    if (token == null || token == 'guest') {
-      isGuest = true;
-      _currentUser = null;
-      return null;
-    }
-    isGuest = false;
-    try {
-      final user = await getProfileData();
+  print(" Auto-login initiated...");
+
+  final token = await PrefHelpers.getToken();
+  print(" Current Token 🔑$token");
+
+   // to check if token is valid
+  if (token == null || token == 'guest') {
+    print(" No valid token found, continuing as guest.");
+    isGuest = true;
+    _currentUser = null;
+    return null;
+  }
+
+  try {
+    final user = await getProfileData();
+
+    if (user != null) {
+      print("✅ Auto-login successful for user: ${user.name}");
+      isGuest = false;
       _currentUser = user;
       return _currentUser;
-    } catch (e) {
+    } else {
+     
+      print("❌ Auto-login failed, switching to guest mode.");
       await PrefHelpers.clearToken();
+      await PrefHelpers.saveToken('guest');
       isGuest = true;
       _currentUser = null;
       return null;
     }
+  } catch (e) {
+    print("❌ Auto-login error: $e, switching to guest mode.");
+    await PrefHelpers.clearToken();
+    await PrefHelpers.saveToken('guest');
+    isGuest = true;
+    _currentUser = null;
+    return null;
   }
+}
+
 
   UserModel? get currentUser => _currentUser;
-
   bool get isLoggedin => !isGuest && _currentUser != null;
 }

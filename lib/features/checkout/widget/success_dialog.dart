@@ -71,7 +71,7 @@ class SuccessDialog extends StatelessWidget {
                   btnBackground: AppColors.primaryColor,
                   titleColor: Colors.white,
                   title: 'Go Back',
-                  onTap: () => Get.offAll(Root()),
+                  onTap: () => Get.offAll(() => Root()),
                 ),
               ],
             ),

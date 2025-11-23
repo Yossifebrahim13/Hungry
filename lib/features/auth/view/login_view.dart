@@ -45,7 +45,7 @@ class _LoginViewState extends State<LoginView> {
             "You have successfully Logged In.",
             AppColors.primaryColor,
           );
-          Get.offAll(Root());
+          Get.offAll(() => Root());
           setState(() => isLoading = false);
         }
       } catch (e) {
@@ -62,8 +62,7 @@ class _LoginViewState extends State<LoginView> {
   @override
   void initState() {
     super.initState();
-    emailController.text = 'joo@gmail.com';
-    passwordController.text = '123456789';
+    
   }
 
   @override

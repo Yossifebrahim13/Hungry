@@ -16,6 +16,8 @@ class DioClient {
           final token = await PrefHelpers.getToken();
           if (token != null && token.isNotEmpty && token != 'guest') {
             options.headers['Authorization'] = 'Bearer $token';
+          } else {
+            options.headers.remove('Authorization'); 
           }
           return handler.next(options);
         },
@@ -24,4 +26,6 @@ class DioClient {
   }
 
   Dio get dio => _dio;
+
+  BaseOptions get options => _dio.options; 
 }

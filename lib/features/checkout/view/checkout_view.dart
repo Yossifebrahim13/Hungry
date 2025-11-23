@@ -8,16 +8,21 @@ import 'package:hungry/features/checkout/widget/success_dialog.dart';
 import 'package:hungry/shared/custom_button.dart';
 import 'package:hungry/shared/custom_text.dart';
 
-class ChekoutView extends StatefulWidget {
-  const ChekoutView({super.key});
+class CheckoutView extends StatefulWidget {
+  const CheckoutView({super.key, required this.totalPrice});
+
+  final String totalPrice;
 
   @override
-  State<ChekoutView> createState() => _ChekoutViewState();
+  State<CheckoutView> createState() => _CheckoutViewState();
 }
 
-class _ChekoutViewState extends State<ChekoutView> {
+class _CheckoutViewState extends State<CheckoutView> {
   bool isChecked = false;
   String selectedMethod = 'Cash';
+  final double deliveryFee = 2.30;
+  final double taxes = 0.3;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,10 +41,14 @@ class _ChekoutViewState extends State<ChekoutView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               OrderDetailsWidget(
-                order: '18.50',
-                taxes: '0.3',
-                fees: '2.30',
-                total: '21.13',
+                order: widget.totalPrice,
+                taxes: taxes.toStringAsFixed(2).toString(),
+                fees: deliveryFee.toStringAsFixed(2).toString(),
+                total: (
+                  double.parse(widget.totalPrice) +
+                  deliveryFee +
+                  taxes
+                ).toStringAsFixed(2).toString(),
                 time: '15 - 30 mins',
               ),
               Gap(70),
@@ -143,7 +152,11 @@ class _ChekoutViewState extends State<ChekoutView> {
                     fontSize: 20,
                   ),
                   CustomText(
-                    text: "\$21.13",
+                    text: "${(
+                      double.parse(widget.totalPrice) +
+                      deliveryFee +
+                      taxes
+                    ).toStringAsFixed(2)} \$",
                     fontSize: 25,
                     fontWeight: FontWeight.bold,
                   ),

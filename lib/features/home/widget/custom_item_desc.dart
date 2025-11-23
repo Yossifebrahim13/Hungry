@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 
-class CustomText extends StatelessWidget {
-  final String text;
-  final Color? color;
-  final double? fontSize;
-  final FontWeight? fontWeight;
-  const CustomText({
+class CustomItemDesc extends StatelessWidget {
+  const CustomItemDesc({
     super.key,
     required this.text,
     this.color,
     this.fontSize,
     this.fontWeight,
   });
-
+  final String text;
+  final Color? color;
+  final double? fontSize;
+  final FontWeight? fontWeight;
   @override
   Widget build(BuildContext context) {
     return Text(
@@ -22,7 +21,7 @@ class CustomText extends StatelessWidget {
         fontSize: fontSize,
         fontWeight: fontWeight,
       ),
-      overflow: TextOverflow.fade,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:hungry/features/product/widget/costum_product_desc.dart';
 import 'package:hungry/shared/custom_text.dart';
 
 class SpicySlider extends StatefulWidget {
   const SpicySlider({super.key, required this.spicy, required this.onChanged});
+
   final double spicy;
   final ValueChanged<double> onChanged;
 
@@ -14,33 +16,40 @@ class SpicySlider extends StatefulWidget {
 class _SpicySliderState extends State<SpicySlider> {
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final sliderColor = Color.lerp(Colors.blue, Colors.red, widget.spicy)!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Column(
-          children: [
-            CustomText(
+        CustomProductDesc(
           text:
-              "Customize Your Burger \n to  Your Tastes. Ultimate \n Experience",
-              fontSize: 16,
+              "Customize Your Burger \n to Your Tastes. Ultimate \n Experience",
+          fontSize: 12,
         ),
-        Slider(
-          min: 0.0,
-          max: 1.0,
-          activeColor: widget.spicy >= 0.5 ? Colors.red : Colors.blue,
-          inactiveColor: Colors.grey.shade300,
-          value: widget.spicy,
-          onChanged: widget.onChanged,
+        const Gap(10),
+
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            activeTrackColor: sliderColor,
+            thumbColor: sliderColor,
+            inactiveTrackColor: Colors.grey.shade300,
+            trackHeight: 5,
+          ),
+          child: Slider(
+            min: 0.0,
+            max: 1.0,
+            value: widget.spicy,
+            onChanged: widget.onChanged,
+          ),
         ),
+
         Row(
-          mainAxisSize: MainAxisSize.max,
-          children: [
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: const [
             CustomText(text: "🥶"),
-            Gap(100),
             CustomText(text: "🌶"),
           ],
         ),
-          ],
-        )
       ],
     );
   }
